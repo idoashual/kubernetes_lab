@@ -1,19 +1,42 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-spec:
-  selector:
-    matchLabels:
-      app: nginx
-  replicas: 2 
-  template: 
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:mainline-alpine
-        ports:
-        - containerPort: 80
+import networkx as nx
+
+def custom_pagerank(graph, alpha=0.85, max_iter=100, dangling_weight=1.0, normal_weight=0.5):
+    # Initialize the personalization vector
+    personalization = {}
+    for node in graph.nodes:
+        if graph.out_degree(node) == 0:  # Check if the node is a dangling node
+            personalization[node] = dangling_weight
+            print(node+"*")
+        else:
+            personalization[node] = normal_weight
+            print(node)
+
+    # Normalize the personalization vector
+    norm = sum(personalization.values())
+    for node in personalization:
+        personalization[node] /= norm
+
+    # Run the PageRank algorithm with the custom personalization vector
+    pagerank_scores = nx.pagerank(graph, alpha=alpha, max_iter=max_iter, personalization=personalization)
+    
+    return pagerank_scores
+
+# Example usage
+# Create a directed graph
+G = nx.DiGraph()
+
+# Add edges with weights (default weight is 1)
+G.add_edge('1', '2',weight=0.5)
+G.add_edge('1', '4',weight=0.5)
+G.add_edge('2', '4',weight=0.5)
+G.add_edge('2', '3',weight=1.0)
+G.add_edge('4', '5',weight=1.0)
+# G.add_edge('2', '3')
+# G.add_edge('4', '5')
+
+# Calculate custom PageRank scores
+pagerank_scores = custom_pagerank(G)
+
+# Print the PageRank scores
+for node, score in pagerank_scores.items():
+    print(f"Node {node}: {score}")
